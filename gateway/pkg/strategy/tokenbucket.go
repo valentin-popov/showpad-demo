@@ -21,13 +21,18 @@ func (tb *TokenBucket) Accept(userId string, refillRate float64, path string) bo
 	defer tb.Mu.Unlock()
 
 	if _, found := tb.LastRefill[path][userId]; !found {
+		if tb.LastRefill[path] == nil {
+			tb.LastRefill[path] = map[string]time.Time{}
+		}
 		tb.LastRefill[path][userId] = tb.Created
 	}
 	now := time.Now()
 
 	elapsedSeconds := now.Sub(tb.LastRefill[path][userId]).Seconds()
 	refillTokens := int(elapsedSeconds * refillRate)
-
+	if tb.CurrentTokens[path] == nil {
+		tb.CurrentTokens[path] = map[string]int{}
+	}
 	tb.CurrentTokens[path][userId] = min(tb.Capacity, tb.CurrentTokens[path][userId]+refillTokens)
 	tb.LastRefill[path][userId] = now
 

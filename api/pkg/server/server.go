@@ -37,6 +37,7 @@ func (s *Server) Run(ctx context.Context) error {
 		}
 	}()
 
+	fmt.Println("API server running on " + s.hostname)
 	<-ctx.Done()
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second)

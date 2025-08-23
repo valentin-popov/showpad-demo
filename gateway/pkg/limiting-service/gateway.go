@@ -98,6 +98,7 @@ func (l *Limiter) Run(ctx context.Context) error {
 			log.Fatal(err)
 		}
 	}()
+	fmt.Println("API gateway running on " + l.hostname)
 
 	<-ctx.Done()
 
@@ -173,7 +174,7 @@ func (l *Limiter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "{userId: %s, rate: %2f}", victimId, data.Rate)
+		fmt.Fprintf(w, "{userId: %s, rate: %.3f}", victimId, data.Rate)
 		return
 	}
 
