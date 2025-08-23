@@ -3,6 +3,7 @@ package limiter
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"gateway/pkg/config"
 	errorlog "gateway/pkg/error-log"
@@ -136,6 +137,46 @@ func (l *Limiter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// user quota update
+	if r.Method == http.MethodPut && strings.HasPrefix(r.URL.Path, "/users/") {
+
+		if !isAdmin(userId) {
+			http.Error(w, respUnauthorized, http.StatusUnauthorized)
+			return
+		}
+
+		parts := strings.Split(r.URL.Path, "/")
+		if len(parts) < 3 {
+			http.Error(w, respBadRequest, http.StatusBadRequest)
+			return
+		}
+		victimId := parts[2]
+
+		byteSlc, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, respBadRequest, http.StatusBadRequest)
+			return
+		}
+
+		data := struct {
+			Rate float64 `json:"rate"`
+		}{}
+
+		if err := json.Unmarshal(byteSlc, &data); err != nil {
+			http.Error(w, respBadRequest, http.StatusBadRequest)
+			return
+		}
+
+		if err := l.updateUserQuota(victimId, data.Rate); err != nil {
+			http.Error(w, respInternalServer, http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "{userId: %s, rate: %2f}", victimId, data.Rate)
+		return
+	}
+
 	algo := l.routeLimits[r.URL.Path]
 
 	if algo == nil {
@@ -216,3 +257,9 @@ func (l *Limiter) isValidUser(userId string) bool {
 
 	return true
 }
+
+func isAdmin(userId string) bool {
+	return userId == "0"
+}
+
+func updateUser(w http.ResponseWriter, r *http.Request) {}

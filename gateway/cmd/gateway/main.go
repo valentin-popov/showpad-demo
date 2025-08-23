@@ -12,7 +12,6 @@ import (
 func main() {
 
 	cfg, err := config.Load("config/gateway.hcl")
-
 	if err != nil {
 		log.Fatal("Failed to load config: ", err)
 	}

@@ -36,9 +36,10 @@ func main() {
 	// Insert two users with creation date
 	_, err = db.Exec(`
         INSERT OR REPLACE INTO users (id, name, quota, created_at) VALUES
+		(0, 'Admin', 10, ?),
         (1, 'Ionel', 0.5, ?),
         (2, 'Ionela', 1.0, ?)
-    `, now, now)
+    `, now, now, now)
 	if err != nil {
 		log.Fatal("Failed to insert users:", err)
 	}

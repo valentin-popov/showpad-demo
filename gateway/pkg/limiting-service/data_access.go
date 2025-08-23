@@ -19,3 +19,16 @@ func NewDB(ctx context.Context, filename string) (*sql.DB, error) {
 	}
 	return db, nil
 }
+
+func (l *Limiter) updateUserQuota(userId string, requestRate float64) error {
+	_, err := l.sqlDb.Exec(`
+	UPDATE users SET quota = ? WHERE id = ?`,
+		requestRate, userId,
+	)
+
+	if err == nil {
+		l.userIdCache.Add(userId, requestRate)
+	}
+
+	return err
+}

@@ -66,7 +66,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	// write response body
 	fmt.Fprint(w, respSuccess)
 
 }
