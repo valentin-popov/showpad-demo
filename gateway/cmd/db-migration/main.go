@@ -43,5 +43,14 @@ func main() {
 		log.Fatal("Failed to insert users:", err)
 	}
 
+	_, err = db.Exec(`
+	CREATE TABLE IF NOT EXISTS request_count (
+		user_id INTEGER NOT NULL,
+		path TEXT NOT NULL,
+		window_start INTEGER NOT NULL,
+		count INTEGER NOT NULL,
+		PRIMARY KEY (user_id, path, window_start)
+	);`)
+
 	fmt.Println("Migration completed successfully.")
 }

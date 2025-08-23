@@ -12,4 +12,5 @@ var (
 	ErrInvalidAPIHostname = errors.New("api hostname is invalid")
 
 	ErrTokenCapacity = errors.New("capacity must be > 0 for route")
+	ErrWindowSize    = errors.New("window_size must be > 0 for route")
 )

@@ -23,6 +23,6 @@ routes {
 routes {
   path        = "/bar"
   strategy    = "fixed_window"
-  limit       = 10
   window_size = 10 // seconds
+  sql_table    = "request_count"
 }

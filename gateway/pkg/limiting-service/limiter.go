@@ -60,14 +60,21 @@ func New(ctx context.Context, cfg *config.Config) (*Limiter, error) {
 		switch route.Strategy {
 		case "token_bucket":
 			routeLimits[path] = &strategy.TokenBucket{
-				Capacity:      route.Capacity,
+				Capacity:      route.BucketCap,
 				Created:       time.Now(),
 				Mu:            sync.Mutex{},
 				LastRefill:    map[string]map[string]time.Time{},
 				CurrentTokens: map[string]map[string]int{},
 			}
-		}
 
+		case "fixed_window":
+			routeLimits[path] = &strategy.FixedWindow{
+				LengthSeconds: route.WindowLength,
+				SqlDb:         db,
+				Logger:        logger,
+				SqlTable:      route.SqlTable,
+			}
+		}
 	}
 
 	if len(routeLimits) != 0 {
@@ -151,6 +158,7 @@ func (l *Limiter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (l *Limiter) Stop() {
 	l.logger.WriteInfo("Shutting down limiter...")
 	l.logger.Close()
+	l.sqlDb.Close()
 }
 
 func (l *Limiter) sendToAPI(w http.ResponseWriter, r *http.Request) {

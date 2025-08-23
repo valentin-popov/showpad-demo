@@ -28,9 +28,10 @@ type apiConfig struct {
 }
 
 type routeConfig struct {
-	Strategy string
-	Capacity int
-	Limit    int
+	Strategy     string
+	BucketCap    int // for token bucket
+	WindowLength int // for fixed window, seconds
+	SqlTable     string
 }
 
 type hclConf struct {
@@ -52,11 +53,12 @@ type hclConf struct {
 }
 
 type hclRoute struct {
-	Path       string  `hcl:"path"`
-	Strategy   string  `hcl:"strategy"`
-	Capacity   int     `hcl:"capacity,optional"`
-	Limit      int     `hcl:"limit,optional"`
-	WindowSize int     `hcl:"window_size,optional"`
+	Path       string `hcl:"path"`
+	Strategy   string `hcl:"strategy"`
+	Capacity   int    `hcl:"capacity,optional"`
+	Limit      int    `hcl:"limit,optional"`
+	WindowSize int    `hcl:"window_size,optional"`
+	SqlTable   string `hcl:"sql_table,optional"`
 }
 
 // Load reads and parses the HCL configuration file.
@@ -137,16 +139,22 @@ func (rawconf *hclConf) Parse() (*Config, error) {
 			}
 
 			routeLimits[route.Path] = routeConfig{
-				Strategy: route.Strategy,
-				Capacity: route.Capacity,
+				Strategy:  route.Strategy,
+				BucketCap: route.Capacity,
 			}
 
 		case "fixed_window":
-			if route.Limit <= 0 {
-				return nil, fmt.Errorf("limit must be > 0 for route %s", route.Path)
-			}
+
 			if route.WindowSize == 0 {
-				return nil, fmt.Errorf("window_size is required for route %s", route.Path)
+				return nil, fmt.Errorf("%w %s", ErrWindowSize, route.Path)
+			}
+			if route.SqlTable == "" {
+				route.SqlTable = "request_count"
+			}
+			routeLimits[route.Path] = routeConfig{
+				Strategy:     route.Strategy,
+				WindowLength: route.WindowSize,
+				SqlTable:     route.SqlTable,
 			}
 		default:
 			return nil, fmt.Errorf("invalid strategy for route %s", route.Path)
