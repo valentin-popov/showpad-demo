@@ -12,7 +12,6 @@ import (
 func main() {
 
 	cfg, err := config.Load("config/api.hcl")
-	// cfg, err := config.Load("/Users/valentin/Documents/dev/showpad-demo/api/config/api.hcl")
 
 	if err != nil {
 		log.Fatal("Failed to load config: ", err)
