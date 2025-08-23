@@ -1,0 +1,21 @@
+package limiter
+
+import (
+	"context"
+	"database/sql"
+
+	_ "modernc.org/sqlite"
+)
+
+// NewDB initializes and returns a new database connection.
+func NewDB(ctx context.Context, filename string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite", "file:"+filename)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := db.PingContext(ctx); err != nil {
+		return nil, err
+	}
+	return db, nil
+}
