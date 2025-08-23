@@ -262,5 +262,3 @@ func (l *Limiter) isValidUser(userId string) bool {
 func isAdmin(userId string) bool {
 	return userId == "0"
 }
-
-func updateUser(w http.ResponseWriter, r *http.Request) {}
