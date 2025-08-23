@@ -45,6 +45,9 @@ This application is formed of two components:
   The application backend, hidden behind the API gateway
   - Validates authorization and does basically nothing
 
+
+![alt text](image.png)
+
 This implementation has a few advantages:
 - The responsiblity is well separated.
 - The two components can scale independently.
@@ -54,7 +57,7 @@ This implementation has a few advantages:
 - Latency - there are more hops in a request round-trip, compared to a single-component design.
 - More deployment and configuration overhead for two services instead of one.
 
-![alt text](image.png)
+
   
 ## Getting started (local dev)
 1. Ensure Go 1.20+ is installed.
