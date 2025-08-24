@@ -103,3 +103,12 @@ This implementation has a few advantages:
   ```
   npm test
   ```
+
+## Deployment
+The app can be accessed on the following URL:
+  ```sh
+  https://showpad-demo-mftq.onrender.com/foo
+  ```
+
+  ⚠️ Note: This app is deployed on Render's free tier. You may experience long delays or cold starts when the app hasn't been accessed recently.
+
