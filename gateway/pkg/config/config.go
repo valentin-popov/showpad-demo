@@ -75,6 +75,12 @@ func (rawconf *hclConf) Parse() (*Config, error) {
 		return nil, ErrInvalidAPIAddress
 	}
 
+	port := os.Getenv("PORT")
+	if port != "" {
+		// for google cloud
+		rawconf.Gateway.Address = ":" + port
+	}
+	
 	if rawconf.Gateway.Address == "" {
 		return nil, ErrMissingGatewayAddress
 	}
@@ -96,7 +102,6 @@ func (rawconf *hclConf) Parse() (*Config, error) {
 		// for google cloud
 		rawconf.Api.Address = envApiAddr
 	}
-
 
 	if rawconf.Api.Address == "" {
 		return nil, ErrInvalidAPIAddress
