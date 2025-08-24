@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	hcl "github.com/hashicorp/hcl/v2/hclsimple"
@@ -80,7 +81,7 @@ func (rawconf *hclConf) Parse() (*Config, error) {
 		// for google cloud
 		rawconf.Gateway.Address = ":" + port
 	}
-	
+
 	if rawconf.Gateway.Address == "" {
 		return nil, ErrMissingGatewayAddress
 	}
@@ -101,6 +102,9 @@ func (rawconf *hclConf) Parse() (*Config, error) {
 	if envApiAddr != "" {
 		// for google cloud
 		rawconf.Api.Address = envApiAddr
+	}
+	if !strings.HasPrefix(rawconf.Api.Address, "http") {
+		rawconf.Api.Address = "http://" + rawconf.Api.Address
 	}
 
 	if rawconf.Api.Address == "" {

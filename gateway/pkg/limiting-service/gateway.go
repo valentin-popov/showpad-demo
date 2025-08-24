@@ -204,8 +204,7 @@ func (l *Limiter) Stop() {
 }
 
 func (l *Limiter) sendToAPI(w http.ResponseWriter, r *http.Request) {
-	url := "http://" + l.apiAddress
-	req, err := http.NewRequest(r.Method, url, r.Body)
+	req, err := http.NewRequest(r.Method, l.apiAddress, r.Body)
 	if err != nil {
 		l.logger.WriteError(fmt.Errorf("internal server error: %w", err))
 		http.Error(w, respInternalServer, http.StatusInternalServerError)
