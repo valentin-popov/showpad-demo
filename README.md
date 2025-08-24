@@ -94,4 +94,12 @@ This implementation has a few advantages:
   The endpoint will return a `401` response if accessed by any other user.
 
 ## Tests
-- Tests can be found in TODO: fixme
+- Tests can be found in [tests](tests)
+- Install dependencies
+  ```sh
+  cd tests && npm install
+  ```
+- Run tests
+  ```
+  npm test
+  ```

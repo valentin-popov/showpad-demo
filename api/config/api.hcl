@@ -1,4 +1,4 @@
 api {
-  address = "localhost:8080"
+  address = "localhost:8081"
   key      = "topsecret"
 }
