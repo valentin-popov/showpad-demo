@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	hcl "github.com/hashicorp/hcl/v2/hclsimple"
@@ -9,9 +10,8 @@ import (
 
 // Gateway configuration structure.
 type Config struct {
-	Hostname string
-	Port     int
-	Routes   map[string]routeConfig
+	Address string
+	Routes  map[string]routeConfig
 
 	LogFile string
 	DBFile  string
@@ -22,9 +22,8 @@ type Config struct {
 }
 
 type apiConfig struct {
-	Hostname string
-	Port     int
-	Key      string
+	Address string
+	Key     string
 }
 
 type routeConfig struct {
@@ -36,17 +35,15 @@ type routeConfig struct {
 
 type hclConf struct {
 	Gateway *struct {
-		Hostname     string `hcl:"hostname"`
-		Port         int    `hcl:"port"`
+		Address      string `hcl:"address"`
 		LogFile      string `hcl:"log_file"`
 		DBFile       string `hcl:"db_file"`
 		UserCacheTTL int    `hcl:"user_cache_ttl_minutes,optional"`
 	} `hcl:"gateway,block"`
 
 	Api *struct {
-		Hostname string `hcl:"hostname"`
-		Port     int    `hcl:"port"`
-		Key      string `hcl:"key"`
+		Address string `hcl:"address"`
+		Key     string `hcl:"key"`
 	} `hcl:"api,block"`
 
 	Routes []hclRoute `hcl:"routes,block"`
@@ -75,14 +72,11 @@ func Load(filename string) (*hclConf, error) {
 // Parse validates and converts the raw HCL configuration into a Config instance.
 func (rawconf *hclConf) Parse() (*Config, error) {
 	if rawconf.Gateway == nil {
-		return nil, ErrInvalidAPIHostname
+		return nil, ErrInvalidAPIAddress
 	}
 
-	if rawconf.Gateway.Hostname == "" {
-		return nil, ErrMissingGatewayHost
-	}
-	if rawconf.Gateway.Port == 0 {
-		rawconf.Gateway.Port = 8080
+	if rawconf.Gateway.Address == "" {
+		return nil, ErrMissingGatewayAddress
 	}
 
 	if rawconf.Gateway.LogFile == "" {
@@ -97,28 +91,29 @@ func (rawconf *hclConf) Parse() (*Config, error) {
 		rawconf.Gateway.UserCacheTTL = 10 // minutes
 	}
 
-	if rawconf.Api.Hostname == "" {
-		return nil, ErrInvalidAPIHostname
+	envApiAddr := os.Getenv("API_ADDRESS")
+	if envApiAddr != "" {
+		// for google cloud
+		rawconf.Api.Address = envApiAddr
 	}
-	if rawconf.Api.Port == 0 {
-		rawconf.Api.Port = 8081
 
+
+	if rawconf.Api.Address == "" {
+		return nil, ErrInvalidAPIAddress
 	}
 	if rawconf.Api.Key == "" {
 		return nil, ErrInvalidAPIKey
 	}
 
 	conf := &Config{
-		Hostname:     rawconf.Gateway.Hostname,
-		Port:         rawconf.Gateway.Port,
+		Address:      rawconf.Gateway.Address,
 		LogFile:      rawconf.Gateway.LogFile,
 		UserCacheTTL: time.Duration(rawconf.Gateway.UserCacheTTL),
 		DBFile:       rawconf.Gateway.DBFile,
 
 		Api: &apiConfig{
-			Hostname: rawconf.Api.Hostname,
-			Port:     rawconf.Api.Port,
-			Key:      rawconf.Api.Key,
+			Address: rawconf.Api.Address,
+			Key:     rawconf.Api.Key,
 		},
 	}
 

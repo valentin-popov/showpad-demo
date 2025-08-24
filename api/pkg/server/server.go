@@ -12,22 +12,22 @@ import (
 
 // Server represents the API server with its configuration.
 type Server struct {
-	hostname string
-	key      string
+	address string
+	key     string
 }
 
 // New creates a new Server instance with the provided configuration.
 func New(cfg *config.Config) *Server {
 	return &Server{
-		hostname: fmt.Sprintf("%s:%d", cfg.Hostname, cfg.Port),
-		key:      cfg.Key,
+		address: cfg.Address,
+		key:     cfg.Key,
 	}
 }
 
 // Run starts the HTTP server and listens for incoming requests.
 func (s *Server) Run(ctx context.Context) error {
 	srv := http.Server{
-		Addr:    s.hostname,
+		Addr:    s.address,
 		Handler: s,
 	}
 
@@ -37,7 +37,7 @@ func (s *Server) Run(ctx context.Context) error {
 		}
 	}()
 
-	fmt.Println("API server running on " + s.hostname)
+	fmt.Println("API server running on " + s.address)
 	<-ctx.Done()
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second)

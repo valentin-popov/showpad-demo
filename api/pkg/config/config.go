@@ -1,21 +1,21 @@
 package config
 
 import (
+	"os"
+
 	hcl "github.com/hashicorp/hcl/v2/hclsimple"
 )
 
 // API configuration structure.
 type Config struct {
-	Hostname string
-	Port     int
-	Key      string
+	Address string
+	Key     string
 }
 
 type hclConf struct {
 	Api *struct {
-		Hostname string `hcl:"hostname"`
-		Port     int    `hcl:"port"`
-		Key      string `hcl:"key"`
+		Address string `hcl:"address"`
+		Key     string `hcl:"key"`
 	} `hcl:"api,block"`
 }
 
@@ -33,8 +33,14 @@ func Load(filename string) (*hclConf, error) {
 // Parse validates and converts the raw HCL configuration into a Config instance.
 func (rawconf *hclConf) Parse() (*Config, error) {
 
-	if rawconf.Api.Hostname == "" {
-		return nil, ErrInvalidAPIHostname
+	if rawconf.Api.Address == "" {
+		return nil, ErrInvalidAPIAddress
+	}
+
+	port := os.Getenv("PORT")
+	if port != "" {
+		// for google cloud
+		rawconf.Api.Address = ":" + port
 	}
 
 	if rawconf.Api.Key == "" {
@@ -43,9 +49,8 @@ func (rawconf *hclConf) Parse() (*Config, error) {
 
 	return &Config{
 
-		Hostname: rawconf.Api.Hostname,
-		Port:     rawconf.Api.Port,
-		Key:      rawconf.Api.Key,
+		Address: rawconf.Api.Address,
+		Key:     rawconf.Api.Key,
 	}, nil
 
 }

@@ -18,15 +18,15 @@ import (
 
 // Limiter represents a rate limiter structure.
 type Limiter struct {
-	hostname string
+	address string
 
 	logger      *errorlog.Logger
 	routeLimits map[string]strategy.LimitStrategy
 	sqlDb       *sql.DB
 	userIdCache *UserCache
 
-	apiHostname string
-	apiKey      string
+	apiAddress string
+	apiKey     string
 }
 
 // New creates a new Limiter instance with the provided configuration.
@@ -42,7 +42,7 @@ func New(ctx context.Context, cfg *config.Config) (*Limiter, error) {
 	}
 
 	lim := &Limiter{
-		hostname: fmt.Sprintf("%s:%d", cfg.Hostname, cfg.Port),
+		address: cfg.Address,
 
 		sqlDb:  db,
 		logger: logger,
@@ -50,8 +50,8 @@ func New(ctx context.Context, cfg *config.Config) (*Limiter, error) {
 			data: make(map[string]userData),
 			ttl:  cfg.UserCacheTTL * time.Minute,
 		},
-		apiHostname: fmt.Sprintf("%s:%d", cfg.Api.Hostname, cfg.Api.Port),
-		apiKey:      cfg.Api.Key,
+		apiAddress: cfg.Api.Address,
+		apiKey:     cfg.Api.Key,
 	}
 
 	routeLimits := map[string]strategy.LimitStrategy{}
@@ -89,7 +89,7 @@ func New(ctx context.Context, cfg *config.Config) (*Limiter, error) {
 // Run starts the HTTP server and listens for incoming requests.
 func (l *Limiter) Run(ctx context.Context) error {
 	srv := http.Server{
-		Addr:    l.hostname,
+		Addr:    l.address,
 		Handler: l,
 	}
 
@@ -98,7 +98,7 @@ func (l *Limiter) Run(ctx context.Context) error {
 			log.Fatal(err)
 		}
 	}()
-	fmt.Println("API gateway running on " + l.hostname)
+	fmt.Println("API gateway running on " + l.address)
 
 	<-ctx.Done()
 
@@ -204,7 +204,7 @@ func (l *Limiter) Stop() {
 }
 
 func (l *Limiter) sendToAPI(w http.ResponseWriter, r *http.Request) {
-	url := "http://" + l.apiHostname
+	url := "http://" + l.apiAddress
 	req, err := http.NewRequest(r.Method, url, r.Body)
 	if err != nil {
 		l.logger.WriteError(fmt.Errorf("internal server error: %w", err))

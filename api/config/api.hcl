@@ -1,5 +1,4 @@
 api {
-  hostname = "localhost"
+  address = "localhost:8080"
   key      = "topsecret"
-  port     = 8081
 }

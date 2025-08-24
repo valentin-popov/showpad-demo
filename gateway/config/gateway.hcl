@@ -1,7 +1,6 @@
 
 gateway {
-  hostname               = "localhost"
-  port                   = 8080
+  address               = "localhost:8080"
   log_file               = "gateway.log"
   db_file                = "limiter.db"
   user_cache_ttl_minutes = 10
@@ -9,9 +8,8 @@ gateway {
 }
 
 api {
-  hostname = "localhost"
+  address = "localhost:8081"
   key      = "topsecret"
-  port     = 8081
 }
 
 routes {
